@@ -694,6 +694,18 @@ client.on('message', async message =>{
 
     if(cantidad > dinerot) return message.channel.send("No tienes tanto dinero para retirar!")
 
+    if(cantidad === "all"){
+
+      const dinerobancototal = await dinero.obtener(`${user.id}`)
+
+      
+      dinerobanco.restar(`${user.id}`, dinerototal)
+      dinero.sumar(`${user.id}`, dinerototal)
+       
+      message.channel.send(`<a:Dinero:865796080678862889> **${user.username}** ha retirado todo su dinero del banco`)
+
+    }
+
     dinerobanco.restar(`${user.id}`, cantidad)
     dinero.sumar(`${user.id}`, cantidad)
 
@@ -709,6 +721,17 @@ client.on('message', async message =>{
     const dinerot = await dinero.obtener(`${user.id}`)
 
     if(cantidad > dinerot) return message.channel.send("No tienes tanto dinero para depositar!")
+
+    if(cantidad === "all"){
+
+      const dinerototal = await dinero.obtener(`${user.id}`)
+
+      dinero.restar(`${user.id}`, dinerototal)
+      dinerobanco.sumar(`${user.id}`, dinerototal)
+       
+      message.channel.send(`<a:Dinero:865796080678862889> **${user.username}** ha depositado todo su dinero en el banco`)
+
+    }
 
     dinerobanco.sumar(`${user.id}`, cantidad)
     dinero.restar(`${user.id}`, cantidad)
@@ -898,6 +921,28 @@ client.on('message', async message =>{
     .setColor('GREEN')
 
     message.channel.send(embed)
+
+  }else if(command === "pay"){
+
+    const user = message.author;
+    const target = message.mentions.users.first();
+
+    if(!target) return message.channel.send("Debes mencionar a un usuario!")
+
+    const cantidad = args[1]
+    if(!cantidad) return message.channel.send("Debes decir la cantidad que vas a pagar!")
+
+    const dinerouser = dinero.obtener(`${user.id}`)
+    const dinerotarget = dinero.obtener(`${target.id}`)
+
+    if(dinerouser < cantidad) return message.channel.send("No tienes dinero suficiente!")
+
+    dinero.sumar(`${target.id}`, cantidad)
+
+    dinero.restar(`${user.id}`, cantidad)
+
+    message.channel.send(`<a:Dinero:865796080678862889> **${target.username}** ha pagado **${cantidad}$** a ${user.username}`)
+
   }
 });
 
