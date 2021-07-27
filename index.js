@@ -696,11 +696,10 @@ client.on('message', async message =>{
 
     if(cantidad === "all"){
 
-      const dinerobancototal = await dinero.obtener(`${user.id}`)
-
+      const dinerobancototal = await dinerobanco.obtener(`${user.id}`)
       
-      dinerobanco.restar(`${user.id}`, dinerototal)
-      dinero.sumar(`${user.id}`, dinerototal)
+      dinerobanco.restar(`${user.id}`, dinerobancototal)
+      dinero.sumar(`${user.id}`, dinerobancototal)
        
       message.channel.send(`<a:Dinero:865796080678862889> **${user.username}** ha retirado todo su dinero del banco`)
 
