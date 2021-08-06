@@ -32,7 +32,10 @@ const verificationrol = new db.crearDB("verificationrol")
 const dinero = new db.crearDB("dinero")
 const dinerobanco = new db.crearDB("dinerobanco")
 const gema = new db.crearDB("gema")
+const level = new db.crearDB("level")
+const xp = new db.crearDB("currentxp")
 const dbq = require('quick.db')
+const Database = require("@replit/database")
 const { GiveawaysManager } = require('discord-giveaways');
 client.giveaways = new GiveawaysManager(client, {
   storage: './giveaways.json',
@@ -260,7 +263,7 @@ client.on('message', async message =>{
 
     let embed = new Discord.MessageEmbed()
     .setColor('#ff5a00')
-    .addField('Usuario Advertido', `<@${wUser.tag}>`)
+    .addField('Usuario Advertido', `${wUser.username}`)
     .addField('Motivo', `${wReason}`)
     .addField('Numero de warns', warns[wUser.id].warns + "/5")
     .addField('Moderador', message.author.username)
@@ -316,7 +319,7 @@ client.on('message', async message =>{
           })
 
           message.channel.send("Tu ticket ha sido creado existosamente")
-          chanel.send(`${message.author} Aqui tienes tu ticket, ahora solo debes esperar a los <@&822922897466327081>/<@&822921303358701600> para que te puedan ayudar.`)
+          chanel.send(`${message.author} Aqui tienes tu ticket, ahora solo debes esperar a los <@&746209433339822171>> para que te puedan ayudar.`)
         });
       }
     }
@@ -674,14 +677,26 @@ client.on('message', async message =>{
     const gemastotal = await gema.obtener(`${user.id}`)
 
     const embed = new Discord.MessageEmbed()
-    .setTitle(`<a:Dinero:865796080678862889> Dinero de ${user.username} <a:Dinero:865796080678862889>`)
-    .addField("**Dinero**", `${dinerototal}$`)
-    .addField("**Dinero en el banco**", `${dinerobancototal}$`)
-    .addField("**Dinero en total**", dinerototal + dinerobancototal + "$")
-    .addField("**Gemas**", `${gemastotal}`)
+    .setTitle(`Economia de ${user.username}`)
+    .setDescription("Clickea los botones para ver tu dinero o gemas")
     .setColor('GREEN')
 
-    message.channel.send(embed)
+    const btnDinero = new Buttons.MessageButton()
+    .setStyle('green')
+    .setLabel('Dinero')
+    .setEmoji('865796080678862889')
+    .setID('btnMon')
+
+    const btnGema = new Buttons.MessageButton()
+    .setStyle('blurple')
+    .setLabel('Gemas')
+    .setEmoji('866511855337472010')
+    .setID('btnGem')
+
+    message.channel.send({
+      buttons: [btnDinero, btnGema],
+      embed: embed
+    });
 
   }else if(command === "ret"){
 
@@ -942,6 +957,9 @@ client.on('message', async message =>{
 
     message.channel.send(`<a:Dinero:865796080678862889> **${target.username}** ha pagado **${cantidad}$** a ${user.username}`)
 
+  }else if(command === "test"){
+    client.emit('guildMemberAdd', message.member)
+    client.emit('guildMemberRemove', message.member)
   }
 });
 
@@ -1035,6 +1053,7 @@ client.on('clickButton', async (button) => {
     });
 
   }else if(button.id == "btnStaff"){
+
     if(!button.clicker.member.hasPermission('MANAGE_MESSAGE')){
       button.channel.send("No tienes permisos para presionar ese boton!")
     }else{
@@ -1087,6 +1106,7 @@ client.on('clickButton', async (button) => {
     .setTitle("<:Music:865695448480088074> **Comandos De Musica** <:Music:865695448480088074>")
     .setDescription("`e!play`\n\n`e!pause`\n\n`e!continue`\n\n`e!loop`\n\n`e!skip`")
     .setColor('GRAY')
+  
 
     const btnInformacion = new Buttons.MessageButton()
     .setStyle('green')
@@ -1164,6 +1184,73 @@ client.on('clickButton', async (button) => {
 
     button.message.edit({
       buttons: [btnInformacion, btnDiversion, btnMusica, btnUtility, btnStaffs],
+      embed: embed
+    });
+
+  }else if(button.id == "btnMon"){
+
+    if(!dinero.tiene(`${button.clicker.id}`)){
+      dinero.establecer(`${button.clicker}`, 0)
+    }
+
+    if(!dinerobanco.tiene(`${button.clicker.id}`)){
+      dinerobanco.establecer(`${button.clicker.id}`, 0)
+    }
+
+    const dinerototal = await dinero.obtener(`${button.clicker.id}`)
+    const dinerobancototal = await dinerobanco.obtener(`${button.clicker.id}`)
+
+    const embed = new Discord.MessageEmbed()
+    .setTitle(`<a:Dinero:865796080678862889> Dinero de ${button.clicker.user.username} <a:Dinero:865796080678862889>`)
+    .addField(`Dinero`, `${dinerototal}$`)
+    .addField(`Dinero en el banco`, `${dinerobancototal}$`)
+    .addField('Dinero en total', dinerototal + dinerobancototal + '$')
+
+    const btnDinero = new Buttons.MessageButton()
+    .setStyle('green')
+    .setLabel('Dinero')
+    .setEmoji('865796080678862889')
+    .setID('btnMon')
+    .setDisabled();
+
+    const btnGema = new Buttons.MessageButton()
+    .setStyle('blurple')
+    .setLabel('Gemas')
+    .setEmoji('866511855337472010')
+    .setID('btnGem')
+
+    button.message.edit({
+      buttons: [btnDinero, btnGema],
+      embed: embed
+    });
+
+  }else if(button.id == "btnGem"){
+
+    if(!gema.tiene(`${button.clicker.id}`)){
+      gema.establecer(`${button.clicker.id}`, 0)
+    }
+
+    const gemastotal = await gema.obtener(`${button.clicker.id}`)
+
+    const embed = new Discord.MessageEmbed()
+    .setTitle(`<:gema:866511855337472010> Gemas de ${button.clicker.user.username} <:gema:866511855337472010>`)
+    .addField(`Gemas`, `${gemastotal}`)
+
+    const btnDinero = new Buttons.MessageButton()
+    .setStyle('green')
+    .setLabel('Dinero')
+    .setEmoji('865796080678862889')
+    .setID('btnMon')
+
+    const btnGema = new Buttons.MessageButton()
+    .setStyle('blurple')
+    .setLabel('Gemas')
+    .setEmoji('866511855337472010')
+    .setID('btnGem')
+    .setDisabled();
+
+    button.message.edit({
+      buttons: [btnDinero, btnGema],
       embed: embed
     });
 
@@ -1377,10 +1464,87 @@ client.on('message', async message =>{
   }
 })
 
+//////////////NIVELES//////////////
+
+client.on('message', async message =>{
+  if(message.author.bot) return
+
+  let user = message.author;
+
+  if(!xp.tiene(`${user.id}`)) xp.establecer(`${user.id}`, 0)
+  if(!level.tiene(`${user.id}`)) level.establecer(`${user.id}`, 0)
+
+  var xpNeeded = 1500;
+  var addXp = 30;
+
+  await xp.sumar(`${user.id}`, addXp)
+
+  const xpUser = await xp.obtener(`${user.id}`)
+
+  if(xpUser >= xpNeeded){
+    await level.sumar(`${user.id}`, 1)
+    await xp.establecer(`${user.id}`, 0)
+
+    const levelUser = await level.obtener(`${user.id}`)
+
+    client.channels.cache.get("746209478319407194").send(`Bien has subido de nivel ${user}, tu nivel ahora es ${levelUser}`)
+  }
+
+  let args = message.content.slice(prefix.length).trim().split(/ +/g);
+  const command = args.shift().toLowerCase();
+  if(!message.content.startsWith(prefix)) return;
+  if(message.author.bot) return;
+
+  if(command === "level"){
+
+    const user = message.mentions.users.first() || message.author;
+
+    const xpUser = await xp.obtener(`${user.id}`)
+    const levelUser = await level.obtener(`${user.id}`)
+    var xpNeeded = 1500;
+
+    const embed = new Discord.MessageEmbed()
+    .setTitle(`<:Level:872303543200129146> Nivel de ${user.username} <:Level:872303543200129146>`)
+    .addFields(
+      { name: "XP", value: `${xpUser}/${xpNeeded}`, inline: true },
+      { name: "Nivel", value: `${levelUser}`, inline: true }
+    )
+    .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+    .setColor('GREEN')
+
+    message.channel.send(embed)
+
+  }
+})
+
+//////////////BIENVENIDAS Y DESPEDIDAS//////////////
+
+client.on('guildMemberAdd', (member) => {
+	const embed = new Discord.MessageEmbed()
+		.setAuthor('EmirYT57 | Bot')
+		.setTitle('Bienvenido mi pana')
+		.setDescription(`Bienvenido **${member.user.username}**\n\nNo te olvides de divertirte y respetar las reglas para evitar un baneo.\nRecuerda que puedes divertirte pero siempre respetando\nLos panas`)
+		.setFooter('Gracias por unirte :)')
+		.setImage('https://thumbs.gfycat.com/CharmingNarrowKudu-max-14mb.gif')
+		.setColor('03f7a7');
+    client.channels.cache.get("746209471252005005").send(embed)
+});
+
+client.on('guildMemberRemove', member => {
+	const embed = new Discord.MessageEmbed()
+		.setAuthor('EmirYT57 | Bot')
+		.setTitle('BYE')
+		.setDescription(
+			`El usuario **${member.user.username}** se salio del servidor`)
+		.setFooter('Nos vemos pronto :(')
+		.setColor('ff0000');
+	client.channels.cache.get('746209471252005005').send(embed);
+});
+
 //////////////ANTI-LINKS//////////////
 
 client.on('message', async message =>{
-  let words = ['discord.gg', 'discord.com/invite', 'discordapp.com/invite', 'https://', 'http://', 'pelotudo', 'gay', 'bitch', 'boludo', 'tonto', 'puta', 'puto', 'fuck', 'homosexual']
+  let words = ['discord.gg', 'discord.com/invite', 'discordapp.com/invite', 'https://', 'http://', 'pelotudo', 'gay', 'bitch', 'boludo', 'tonto', 'puta', 'puto', 'fuck', 'homosexual','hijoeputa', 'pornhub']
   if(!message.member.hasPermission('ADMINISTRATOR')){
     if(words.some(word => message.content.toLowerCase().includes(word))){
       await message.delete();
@@ -1390,6 +1554,7 @@ client.on('message', async message =>{
 });
 
 client.login(process.env.token);
+
 
 /*const embed = new Discord.MessageEmbed()
 .setTitle("Estos son los comandos del server de ☆EmirYT57☆")
