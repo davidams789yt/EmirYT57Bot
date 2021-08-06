@@ -958,8 +958,62 @@ client.on('message', async message =>{
     message.channel.send(`<a:Dinero:865796080678862889> **${target.username}** ha pagado **${cantidad}$** a ${user.username}`)
 
   }else if(command === "test"){
+
     client.emit('guildMemberAdd', message.member)
     client.emit('guildMemberRemove', message.member)
+
+  }else if(command === "miniyt"){
+
+    if(!message.member.hasPermission("MANAGE_MESSAGE")) return message.reply('No tienes permisos para ejecutar ese comando!')
+
+    const user = message.mentions.users.first();
+
+    if(!user) return message.channel.send("Debes mencionar a un usuario")
+
+    const member = message.guild.members.cache.get(user.id)
+
+    member.roles.add('746209435776712724')
+    message.channel.send(`El rol **MiniYT** fue otorgado al usuario **${user.username}**`)
+
+  }else if(command === "youtu"){
+
+    if(!message.member.hasPermission("MANAGE_MESSAGE")) return message.reply('No tienes permisos para ejecutar ese comando!')
+
+    const user = message.mentions.users.first();
+
+    if(!user) return message.channel.send("Debes mencionar a un usuario")
+
+    const member = message.guild.members.cache.get(user.id)
+
+    member.roles.add('746209435130789918')
+    message.channel.send(`El rol **YT** fue otorgado al usuario **${user.username}**`)
+
+  }else if(command === "famous"){
+
+    if(!message.member.hasPermission("MANAGE_MESSAGE")) return message.reply('No tienes permisos para ejecutar ese comando!')
+
+    const user = message.mentions.users.first();
+
+    if(!user) return message.channel.send("Debes mencionar a un usuario")
+
+    const member = message.guild.members.cache.get(user.id)
+
+    member.roles.add('746209434417496190')
+    message.channel.send(`El rol **Famoso** fue otorgado al usuario **${user.username}**`)
+
+  }else if(command === "streamer"){
+    
+    if(!message.member.hasPermission("MANAGE_MESSAGE")) return message.reply('No tienes permisos para ejecutar ese comando!')
+
+    const user = message.mentions.users.first();
+
+    if(!user) return message.channel.send("Debes mencionar a un usuario")
+
+    const member = message.guild.members.cache.get(user.id)
+
+    member.roles.add('764211547467153448')
+    message.channel.send(`El rol **Streamer** fue otorgado al usuario **${user.username}**`)
+
   }
 });
 
@@ -1515,6 +1569,7 @@ client.on('message', async message =>{
     message.channel.send(embed)
 
   }
+
 })
 
 //////////////BIENVENIDAS Y DESPEDIDAS//////////////
@@ -1544,7 +1599,7 @@ client.on('guildMemberRemove', member => {
 //////////////ANTI-LINKS//////////////
 
 client.on('message', async message =>{
-  let words = ['discord.gg', 'discord.com/invite', 'discordapp.com/invite', 'https://', 'http://', 'pelotudo', 'gay', 'bitch', 'boludo', 'tonto', 'puta', 'puto', 'fuck', 'homosexual','hijoeputa', 'pornhub']
+  let words = ['discord.gg', 'discord.com/invite', 'discordapp.com/invite', 'https://', 'http://', 'pelotudo', 'gay', 'bitch', 'boludo', 'tonto', 'puta', 'puto', 'fuck', 'homosexual','hijoeputa', 'pornhub', 'sexo', 'xnxx']
   if(!message.member.hasPermission('ADMINISTRATOR')){
     if(words.some(word => message.content.toLowerCase().includes(word))){
       await message.delete();
@@ -1552,6 +1607,7 @@ client.on('message', async message =>{
     }
   }
 });
+
 
 client.login(process.env.token);
 
