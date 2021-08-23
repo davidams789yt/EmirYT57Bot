@@ -890,7 +890,20 @@ client.on('message', async message => {
 
       message.channel.send("<:gema:866511855337472010> Has comprado el articulo **Gema**")
 
-    } else {
+    }else if(objeto === "Premium"){
+      if(gema < 30) return message.channel.send("No tienes dinero suficiente para comprar este elemento!")
+
+      if(premium.tiene(`${user.id}`)){
+        message.channel.send("Ya has comprado este elemento anteriormente!")
+      }
+
+      gema.restar(`${user.id}`, 30)
+
+      premium.establecer(`${user.id}`, `${user.username}`)
+
+      message.channel.send("<a:cool:866674612766113812> Has comprado el articulo **Premium**")
+
+    }else {
       message.channel.send("Ese articulo no esta en la tienda!")
     }
 
@@ -957,6 +970,12 @@ client.on('message', async message => {
       .addField("Dinero en total", dineroTotal + dineroBancoTotal + '$')
       .addField("Gemas", gemas)
       .setColor('GREEN')
+
+      if(premium.tiene(`${user.id}`)){
+        embed.addField('Usuario Premium', 'Si')
+      }else{
+        embed.addField('Usuario Premium', 'No')
+      }
 
     message.channel.send(embed)
 
