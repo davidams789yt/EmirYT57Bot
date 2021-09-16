@@ -15,13 +15,12 @@ require('dotenv').config();
 
 Wikipedia = require('./classes/Wikipedia');
 
-///////////////////BOT CODING///////////////////////
+///////////////////LIBRERIAS///////////////////////
 
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const prefix = process.env.prefix;
 const fs = require('fs');
-let warns = JSON.parse(fs.readFileSync('./warns.json', 'utf8'));
 const Distube = require('distube')
 const backup = require('discord-backup');
 const config = require('./config.json')
@@ -32,7 +31,9 @@ const ms = require('ms')
 const fetch = require('node-fetch')
 const db = require('megadb')
 const Canvacord = require('canvacord')
+const ytConfig = require('./data/config.json')
 const { YTSearcher } = require('ytsearcher');
+const dbq = require('quick.db')
 const muterol = new db.crearDB("muterol")
 const verificationrol = new db.crearDB("verificationrol")
 const dinero = new db.crearDB("dinero")
@@ -42,9 +43,11 @@ const level = new db.crearDB("level")
 const xp = new db.crearDB("currentxp")
 const afk = new db.crearDB("afk")
 const premium = new db.crearDB("premium")
-const dbq = require('quick.db')
+const commands = new db.crearDB("commands")
+let warns = JSON.parse(fs.readFileSync('./warns.json', 'utf8'));
 const Database = require("@replit/database")
 const { GiveawaysManager } = require('discord-giveaways');
+
 client.giveaways = new GiveawaysManager(client, {
   storage: './giveaways.json',
   updateCountdown: 5000,
@@ -56,21 +59,6 @@ Buttons(client);
 
 client.config = config;
 
-var welcomeCanvas = {};
-welcomeCanvas.create = Canvas.createCanvas(1024, 500)
-welcomeCanvas.context = welcomeCanvas.create.getContext('2d')
-welcomeCanvas.context.font = '72px sans-serif';
-welcomeCanvas.context.fillStyle = '#ffffff';
-
-Canvas.loadImage("./img/rank.jpg").then(async (img) => {
-    welcomeCanvas.context.drawImage(img, 0, 0, 1024, 500)
-    welcomeCanvas.context.fillText("Bienvenido", 310, 360);
-    welcomeCanvas.context.beginPath();
-    welcomeCanvas.context.arc(512, 166, 128, 0, Math.PI * 2, true);
-    welcomeCanvas.context.stroke()
-    welcomeCanvas.context.fill()
-})
-
 function presence() {
   client.user.setPresence({
     status: 'online',
@@ -81,7 +69,7 @@ function presence() {
   })
 }
 
-client.on('ready', () => {
+client.on('ready', async() => {
   console.log("El bot esta listo!")
   presence();
 });
@@ -92,7 +80,8 @@ client.on('message', async message => {
   if (!message.content.startsWith(prefix)) return;
   if (message.author.bot) return;
 
-  const ticketChannel = '「👮」・soporte'
+  const ticketChannel = '│👮│ᴛɪᴄᴋᴇᴛꜱ'
+  const spamChannel = '│🔨│ᴄᴏᴍᴀɴᴅᴏꜱ-ʏᴛꜱ'
 
   if (command === "say") {
     if (!message.member.hasPermission("ADMINISTRATOR")) return message.reply("No tienes permisos!")
@@ -238,7 +227,7 @@ client.on('message', async message => {
     message.delete();
     kuser.send(`Has sido kickado de ${guild.name}`)
     message.guild.member(kuser).kick(kreason).reason
-    client.channels.cache.get("757801920915308564").send(embed)
+    client.channels.cache.get("880173676203499571").send(embed)
 
   } else if (command === "ban") {
     if (!message.member.hasPermission('BAN_MEMBERS')) return message.reply("No tienes permisos para ejecutar ese comando!")
@@ -266,7 +255,7 @@ client.on('message', async message => {
       .addField("Moderador", message.author.username)
     message.delete();
     bUser.send(`Has sido baneado de ${guild.name}`)
-    client.channels.cache.get("757801920915308564").send(embed)
+    client.channels.cache.get("880173676203499571").send(embed)
 
   } else if (command === "warn") {
     if (!message.member.hasPermission("MANAGE_MESSAGE")) return message.reply("No tienes permisos!")
@@ -290,7 +279,7 @@ client.on('message', async message => {
       .addField('Motivo', `${wReason}`)
       .addField('Numero de warns', warns[wUser.id].warns + "/5")
       .addField('Moderador', message.author.username)
-    client.channels.cache.get('757801920915308564').send(embed);
+    client.channels.cache.get('880173676203499571').send(embed);
 
     if (warns[wUser.id].warns == 3) {
       message.guild.member(wUser).kick(wReason).reason
@@ -336,13 +325,13 @@ client.on('message', async message => {
             SEND_MESSAGE: true,
           })
 
-          chanel.updateOverwrite("746209433339822171", {
+          chanel.updateOverwrite("880173630615605248", {
             VIEW_CHANNEL: true,
             SEND_MESSAGE: true,
           })
 
           message.channel.send("Tu ticket ha sido creado existosamente")
-          chanel.send(`${message.author} Aqui tienes tu ticket, ahora solo debes esperar a los <@&746209433339822171>> para que te puedan ayudar.`)
+          chanel.send(`${message.author} Aqui tienes tu ticket, ahora solo debes esperar a los <@&880173630615605248> para que te puedan ayudar.`)
         });
       }
     }
@@ -400,7 +389,7 @@ client.on('message', async message => {
       embed: embed
     });
 
-  } else if (command === "redes") {
+  } else if (command === "emiryt57") {
     const embed = new Discord.MessageEmbed()
       .setAuthor(message.member.displayName, message.author.displayAvatarURL())
       .setTitle("<:Computadora:865711325014917200> Redes de EmirYT57 <a:tada:865697004730449940>")
@@ -577,6 +566,13 @@ client.on('message', async message => {
     if (user.roles.cache.has(rol)) return message.channel.send("Este usuario ya estaba muteado!")
 
     user.roles.add(rol)
+    let embed = new Discord.MessageEmbed()
+      .setColor('#ff5a00')
+      .addField('Usuario Muteado', `${user.username}`)
+      .addField('Motivo', `${reason}`)
+      .addField('Tiempo', `${time}`)
+      .addField('Moderador', message.author.username)
+    client.channels.cache.get('880173676203499571').send(embed);
 
     await setTimeout(async function() {
       await user.roles.remove(rol);
@@ -1015,6 +1011,7 @@ client.on('message', async message => {
     const member = message.guild.members.cache.get(user.id)
 
     member.roles.add('746209435776712724')
+    member.roles.add('884215309605666837')
     message.channel.send(`El rol **MiniYT** fue otorgado al usuario **${user.username}**`)
 
   } else if (command === "youtu") {
@@ -1028,6 +1025,7 @@ client.on('message', async message => {
     const member = message.guild.members.cache.get(user.id)
 
     member.roles.add('746209435130789918')
+    member.roles.add('884215309605666837')
     message.channel.send(`El rol **YT** fue otorgado al usuario **${user.username}**`)
 
   } else if (command === "famous") {
@@ -1041,6 +1039,7 @@ client.on('message', async message => {
     const member = message.guild.members.cache.get(user.id)
 
     member.roles.add('746209434417496190')
+    member.roles.add('884215309605666837')
     message.channel.send(`El rol **Famoso** fue otorgado al usuario **${user.username}**`)
 
   } else if (command === "streamer") {
@@ -1053,7 +1052,8 @@ client.on('message', async message => {
 
     const member = message.guild.members.cache.get(user.id)
 
-    member.roles.add('764211547467153448')
+    member.roles.add('880173635585835018')
+    member.roles.add('884215309605666837')
     message.channel.send(`El rol **Streamer** fue otorgado al usuario **${user.username}**`)
 
   }else if(command === "wikipedia"){
@@ -1069,6 +1069,69 @@ client.on('message', async message => {
 
     res.fetch()
 
+  }else if(command === "directo"){
+    if(spamChannel !== message.channel.name){
+      return;
+      
+    }else{
+      let user = message.author
+
+      if(!message.member.roles.cache.some(r => r.id === "884215309605666837")) return message.channel.send("No tienes permisos para ejecutar ese comando!")
+
+      let link = args[0]
+      if(!link) return message.channel.send("Debes colocar el link de tu directo!")
+      if(!link.startsWith("https://")) return message.channel.send("Ese no es un link valido!")
+
+      message.delete();
+
+      client.channels.cache.get("880173671019319297").send(`**${user.username}** Esta en directo, vallan a verlo!\n${link}`)
+    }
+
+  }else if(command === "embed"){
+    const msgContent = args.join(' ')
+    const splitMsgContent = msgContent.split('-')
+    const color = splitMsgContent[0]
+    const title = splitMsgContent[1]
+    const description = splitMsgContent[2]
+
+    message.delete();
+
+    const embed = new Discord.MessageEmbed()
+    .setColor(`${color}`)
+    .setTitle(`${title}`)
+    .setDescription(`${description}`)
+
+    if(!color){
+      embed.setColor('BLURPLE')
+    }
+
+    if(!title){
+      embed.setTitle('Titulo')
+    }
+
+    if(!description){
+      embed.setDescription('Descripcion')
+    }
+
+    message.channel.send(embed)
+
+  }else if(command === "video"){
+    if(spamChannel !== message.channel.name){
+      return;
+
+    }else{
+      let user = message.author
+
+      if(!message.member.roles.cache.some(r => r.id === "884215309605666837")) return message.channel.send("No tienes permisos para ejecutar ese comando!")
+
+      let link = args[0]
+      if(!link) return message.channel.send("Debes colocar el link de tu video!")
+      if(!link.startsWith("https://")) return message.channel.send("Ese no es un link valido!")
+
+      message.delete();
+
+      client.channels.cache.get("880173671019319297").send(`**${user.username}** ha subido un nuevo video, vallan a verlo!\n${link}`)
+    }
   }
 });
 
@@ -1487,6 +1550,13 @@ client.on('message', async message => {
       client.distube.setRepeatMode(message, 2)
       message.channel.send("Se **ACTIVO** el loop para esa playlist!")
     }
+
+  }else if(command === "leave"){
+    const voiceChannel = message.member.voice.channel;
+
+    if(!voiceChannel) return message.channel.send("Debes estar en un canal de voz!")
+    await voiceChannel.leave();
+    await message.channel.send(`Se desconecto del canal de voz exitosamente | ${message.author}`)
   }
 });
 
@@ -1645,7 +1715,7 @@ client.on('message', async message => {
 
 //////////////BIENVENIDAS Y DESPEDIDAS//////////////
 
-client.on('guildMemberAdd', async member => {
+client.on('guildMemberAdd', member => {
   const embed = new Discord.MessageEmbed()
 	.setAuthor('EmirYT57 | Bot')
 	.setTitle('Bienvenido mi pana')
@@ -1653,7 +1723,7 @@ client.on('guildMemberAdd', async member => {
 	.setFooter('Gracias por unirte :)')
 	.setImage('https://thumbs.gfycat.com/CharmingNarrowKudu-max-14mb.gif')
 	.setColor('03f7a7');
-  client.channels.cache.get("746209471252005005").send(embed)
+  client.channels.cache.get("880173651675189269").send(embed)
 });
 
 client.on('guildMemberRemove', member => {
@@ -1664,20 +1734,33 @@ client.on('guildMemberRemove', member => {
       `El usuario **${member.user.username}** se salio del servidor`)
     .setFooter('Nos vemos pronto :(')
     .setColor('ff0000');
-  client.channels.cache.get('869594782450733096').send(embed);
+  client.channels.cache.get('880173653998858240').send(embed);
 });
 
 //////////////ANTI-LINKS//////////////
 
 client.on('message', async message => {
-  let words = ['discord.gg', 'discord.com/invite', 'discordapp.com/invite', 'https://', 'http://', 'pelotudo', 'gay', 'bitch', 'boludo', 'tonto', 'puta', 'puto', 'fuck', 'homosexual', 'hijoeputa', 'pornhub', 'sexo', 'xnxx']
-  if (!message.member.hasPermission('ADMINISTRATOR')) {
-    if (words.some(word => message.content.toLowerCase().includes(word))) {
-      await message.delete();
-      return message.reply("No puedes escribir eso!")
+  if(spamChannel !== message.channel.name){
+    let words = ['discord.gg', 'discord.com/invite', 'discordapp.com/invite', 'https://', 'http://', 'pelotudo', 'gay', 'bitch','boludo', 'tonto', 'puta', 'puto', 'fuck', 'homosexual', 'hijoeputa', 'pornhub', 'sexo', 'xnxx', 'pene', 'idiota', 'chupala', 'nepe', 'dick', 'xvideos', 'homofobico', 'analfabeto', 'hdp', 'pendejo']
+    if (!message.member.hasPermission('ADMINISTRATOR')) {
+      if (words.some(word => message.content.toLowerCase().includes(word))) {
+        await message.delete();
+        return message.reply("No puedes escribir eso!")
+      }
+    }
+
+  }else{
+    let words = ['discord.gg', 'discord.com/invite', 'discordapp.com/invite', 'http://', 'pelotudo', 'gay', 'bitch','boludo', 'tonto', 'puta', 'puto', 'fuck', 'homosexual', 'hijoeputa', 'pornhub', 'sexo', 'xnxx', 'pene', 'idiota', 'chupala', 'nepe', 'dick', 'xvideos', 'homofobico', 'analfabeto', 'hdp', 'pendejo']
+    if (!message.member.hasPermission('ADMINISTRATOR')) {
+      if (words.some(word => message.content.toLowerCase().includes(word))) {
+        await message.delete();
+        return message.reply("No puedes escribir eso!")
+      }
     }
   }
 });
+
+//////////////COSAS//////////////
 
 client.login(process.env.token);
 
@@ -1688,6 +1771,10 @@ client.login(process.env.token);
 .addField("<a:ZCVerificado:654352204513411082> **Comandos basicos** <a:ZCVerificado:654352204513411082>", "`e!help` `e!redes`")
 .addField("<a:PartyGlasses:594995517927456810> **Comandos Diversion** <a:PartyGlasses:594995517927456810>", "`e!kiss` `e!boom` `e!kill` `e!8ball` `e!rps`")
 .addField("<a:police:568461852653387785> **Comandos Staffs** <a:police:568461852653387785>", "`e!kick` `e!ban` `e!warn` `e!clear` `e!say` `e!userinfo`")*/
+
+
+
+
 
 
 
